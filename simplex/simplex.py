@@ -45,7 +45,6 @@ class Ecuacion():
         self.igual = self.igual - (self.coeficientes[col_idx] * otra.igual)
         self.coeficientes = [coef - (self.coeficientes[col_idx] * otro_val) 
                              for coef, otro_val in zip(self.coeficientes, otra.coeficientes)]
-        self.igual = self.igual - (self.coeficientes[col_idx] * otra.igual)
 
 
 # =======================================================
@@ -68,7 +67,7 @@ class Simplex():
             La tabla debe de cerrarse para poder escribir la tabla
         """
         if not self.listo:
-            return 'No se ha cerrado la tabla'
+            raise Error('No se ha cerrado la tabla')
         eqs = list(self.restricciones)
         eqs.append('_'*50)
         eqs.append(self.objetivo)
@@ -79,14 +78,15 @@ class Simplex():
         """ Agrega una restriccion a la tabla
         """
         if self.listo:
-            print 'La tabla esta cerrada'
+            raise Error('La tabla esta cerrada')
             return
         self.restricciones.append(restriccion)
 
     # ---------------------------------------------------
     def cerrar(self):
         """ Este metodo esta feo, pero fue como me salio
-            Al "cerrar" la tabla 
+            Al "cerrar" la tabla se agregan las variables de
+            holgura a las restricciones y al objetivo. 
         """
         r = self.restricciones
         objetivos = []
@@ -122,7 +122,7 @@ class Simplex():
         return valores
 
     # ---------------------------------------------------
-    def pivote(self, fila, col_idx):
+    def pivotear(self, fila, col_idx):
         """ Pivotea la tabla
             :param fila La fila pivote
             :param col_idx La columna pivote
@@ -142,25 +142,23 @@ class Simplex():
             :param debug Bandera para escribir a consola el proceso
         """
         if not self.listo:
-            print 'No se ha cerrado la tabla'
-            return
+            raise Error('No se ha cerrado la tabla')
         if len(self.restricciones) == 0:
-            print 'No se han insertado restricciones'
-            return
+            raise Error('No se han insertado restricciones')
         iteracion = 0
         while not min(self.objetivo.coeficientes) >= 0:
             iteracion += 1
             col_pivote = self.columna_pivote()
             fila_pivote = self.fila_pivote(col_pivote)
-            valores_pivote = [(i / f) if f != 0 else 99999 for f, i in zip(fila_pivote, self.objetivos)]
+            valores_pivote = [(i / f) if f != 0 else 9999999999 
+                              for f, i in zip(fila_pivote, self.objetivos)]
             idx_val_salida = valores_pivote.index(min(valores_pivote))
-            self.pivote(idx_val_salida, col_pivote)
+            self.pivotear(idx_val_salida, col_pivote)
             if debug:
                 print '--'*10 + ' iteracion %i ' % iteracion + '--'*10
                 print self
             if iteracion > 100:
-                print 'Ups, algo salio mal'
-                break
+                raise Error('Ups, algo salio mal. Parece que se ciclo')
 
 # =======================================================
 if __name__ == '__main__':
@@ -186,4 +184,3 @@ if __name__ == '__main__':
     print '---'*10 + ' solucion ' + '---'*10
     s.resolver()
     print 'Maximo encontrado: %.3f' % s.objetivo.igual
-    print '\n'*3
