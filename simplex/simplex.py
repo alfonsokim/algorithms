@@ -59,6 +59,7 @@ class Simplex():
         """
         self.objetivo = objetivo
         self.restricciones = []
+        self.iteraciones = 0
         self.listo = False
 
     # ---------------------------------------------------
@@ -157,8 +158,11 @@ class Simplex():
             if debug:
                 print '--'*10 + ' iteracion %i ' % iteracion + '--'*10
                 print self
-            if iteracion > 100:
+            if iteracion > 1000:
+                self.objetivo.igual = -1
                 raise Error('Ups, algo salio mal. Parece que se ciclo')
+        self.iteraciones = iteracion
+
 
 # =======================================================
 if __name__ == '__main__':
@@ -172,7 +176,7 @@ if __name__ == '__main__':
     print s
     print '---'*10 + ' solucion ' + '---'*10
     s.resolver(debug=True)
-    print 'Maximo encontrado: %.3f' % s.objetivo.igual
+    print 'Maximo encontrado: %.3f en %i iteraciones' % (s.objetivo.igual, s.iteraciones)
     print '\n'*3
     
     s = Simplex(Ecuacion([-6, -5, -4], 0))
@@ -183,4 +187,19 @@ if __name__ == '__main__':
     print s
     print '---'*10 + ' solucion ' + '---'*10
     s.resolver()
-    print 'Maximo encontrado: %.3f' % s.objetivo.igual
+    print s
+    print 'Maximo encontrado: %.3f en %i iteracione' % (s.objetivo.igual, s.iteraciones)
+    print '\n'*3
+
+    s = Simplex(Ecuacion([-95, -85], 0))
+    s.add_restriccion(Ecuacion([18, 19], 110))
+    s.add_restriccion(Ecuacion([11, 10], 48))
+    s.add_restriccion(Ecuacion([15, 14], 95))
+    s.add_restriccion(Ecuacion([4, 0], 17))
+    s.cerrar()
+    print s
+    print '---'*10 + ' solucion ' + '---'*10
+    s.resolver()
+    print s
+    print 'Maximo encontrado: %.3f en %i iteracione' % (s.objetivo.igual, s.iteraciones)
+    print '\n'*3
