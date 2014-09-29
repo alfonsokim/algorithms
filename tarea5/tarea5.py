@@ -1,12 +1,18 @@
 
+# -------------------------------------------------------------
 def max_subarray(A):
+    """ Devuelve la suma maxima del arreglo
+    """
     max_ending_here = max_so_far = 0
     for x in A:
         max_ending_here = max(0, max_ending_here + x)
         max_so_far = max(max_so_far, max_ending_here)
     return max_so_far
 
+# -------------------------------------------------------------
 def max_subarray_bounds(A):
+    """ Devuelve los limites del arreglo donde se encuentra la suma maxima
+    """
     max_ending_here = max_so_far = 0
     start = end = temp = 0
     for i, x in enumerate(A):
@@ -21,7 +27,7 @@ def max_subarray_bounds(A):
             end = i
     return start, end
 
-
+# -------------------------------------------------------------
 if __name__ == '__main__':
     import random, sys, math
 
