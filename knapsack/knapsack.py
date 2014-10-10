@@ -15,7 +15,8 @@ problema = [Item('a', 11, 20), Item('b', 7, 10), Item('c', 5, 11), Item('d', 4, 
 
 """ Prueba simple
 """
-simple = [Item('a', 5, 10), Item('b', 4, 40), Item('c', 6, 30), Item('d', 3, 50)]
+simple = [Item('a', 5, 15), Item('b', 7, 40), Item('c', 3, 30), Item('d', 10, 50)]
+
 
 # ===============================================================
 def knapsack_bottom_up(items, max_weight):
@@ -55,20 +56,31 @@ def knapsack_bottom_up(items, max_weight):
 
 
 # ===============================================================
-def knapsack_top_down_recursivo(items, n, max_w):
+def knapsack_top_down_recursivo(items, n, max_w, memory):
     """ Funcion recursiva.
         Devuelve el maximo entre el peso del elemento n-1 y 
         el peso del elemento n-1 + el valor del elemento actual
+        :param items La lista de elementos a procesar
+        :param n El indice de la lista de elementos
+        :param max_w: El peso maximo actual
+        :param memory: La memoria de ejecuciones pasadas
     """
     if n == 0: return 0
+    key = '%i:%i' % (n, max_w) # Llave a las ejecuciones anteriores
+    if key in memory:   # Si los argumentos ya se procesaron
+        return memory[key]  # devolverlos
     ktdr = knapsack_top_down_recursivo # Para evitar lineas largas
     item = items[n - 1]
     if item.weight > max_w: # Si el valor se pasa regresar el n-1
-        return ktdr(items, n - 1, max_w)
+        value = ktdr(items, n - 1, max_w, memory)
+        memory[key] = value # Si no se han procesado se guardan
+        return value
     else:   # Si no, ver cual es el maximo
-        a = ktdr(items, n - 1, max_w)
-        b = ktdr(items, n - 1, max_w - item.weight) + item.value
-        return max(a, b)  # y devolverlo
+        a = ktdr(items, n - 1, max_w, memory)
+        b = ktdr(items, n - 1, max_w - item.weight, memory) + item.value
+        value = max(a, b)
+        memory[key] = value # Si no se han procesado se guardan
+        return value  # y devolverlo
 
 
 # ===============================================================
@@ -83,10 +95,11 @@ def knapsack_top_down(items, max_weight):
     
     # Formar la lista maximizada de salida
     result = []
+    memory = {}
     current_max = max_weight
     for i in range(len(items), 0, -1): # para cada elemento
-        a = ktdr(items, i, current_max)
-        b = ktdr(items, i - 1, current_max)
+        a = ktdr(items, i, current_max, memory)
+        b = ktdr(items, i - 1, current_max, memory)
         if a != b:  # Si es un maximo en su valor local
             result.append(items[i - 1]) # agregar a la lista de salida
             current_max -= items[i - 1].weight
