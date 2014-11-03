@@ -66,18 +66,18 @@ def all_cities(cities, start):
     for path in itertools.permutations(cities):
         one_path = [start]
         one_path.extend(path)
-        all_paths.append(one_path)
-    return all_paths
+        yield one_path
+        #all_paths.append(one_path)
 
 
 # ===================================================================
 def evaluate_all_cities(cities, start):
-    all_paths = all_cities(cities, start)
+    #all_paths = all_cities(cities, start)
     global_min = float('inf')
     global_max = 0
     best_path = None
     worst_path = None
-    for path in all_paths:
+    for path in all_cities(cities, start):
         d = traveled_distance(path) 
         if d < global_min:
             global_min = d
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     #random.seed(1)
     benchmark = open('traveler.txt', 'w')
     print >> benchmark, 'num_cities, greedy, best, worst, time_greedy, time_all'
-    for num_cities in range(10, 13):
+    for num_cities in range(10, 101):
         sys.stdout.write('Evaluando todos los caminos para %i ciudades' % (num_cities))
         sys.stdout.flush()
         graph_file = open('ciudades_%i.txt' % num_cities, 'w')
