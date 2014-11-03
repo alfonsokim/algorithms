@@ -1,8 +1,12 @@
 
+# http://nbviewer.ipython.org/url/norvig.com/ipython/TSPv3.ipynb
+
 from collections import namedtuple
 import math
 import random
 import itertools
+import sys
+import time
 
 City = namedtuple('City', 'name, lat, lon')
 
@@ -23,11 +27,11 @@ def traveled_distance(path):
 
 
 # ===================================================================
-def print_path(path):
+def print_path(path, name='', out=sys.stdout):
     """
     """
     str_path = '->'.join([p.name for p in path])
-    print '%s : %f' % (str_path, traveled_distance(path))
+    print >> out, '[%s] %s : %f' % (name, str_path, traveled_distance(path))
 
 
 # ===================================================================
@@ -78,7 +82,7 @@ def evaluate_all_cities(cities, start):
         if d < global_min:
             global_min = d
             best_path = path
-        if d > worst_path:
+        if d > global_max:
             global_max = d
             worst_path = path
     return best_path, worst_path
@@ -109,11 +113,31 @@ if __name__ == '__main__':
     """
     """
     #random.seed(1)
-    cities = make_random_cities(10)
-    start = random.choice(cities)
-    path = nearest_neighbor(cities, start)
-    print_path(path)
-    print '%s Evaluando todos los caminos %s' % ('*'*10, '*'*10)
-    best_path, worst_path = evaluate_all_cities(cities, start)
-    print_path(best_path)
-    print_path(worst_path)
+    benchmark = open('traveler.txt', 'w')
+    print >> benchmark, 'num_cities, greedy, best, worst, time_greedy, time_all'
+    for num_cities in range(10, 13):
+        sys.stdout.write('Evaluando todos los caminos para %i ciudades' % (num_cities))
+        sys.stdout.flush()
+        graph_file = open('ciudades_%i.txt' % num_cities, 'w')
+        cities = make_random_cities(num_cities)
+        for city in cities:
+            print >> graph_file, '%s:%i,%i' % (city.name, city.lat, city.lon)
+        start = random.choice(cities)
+        t0 = time.clock()
+        greedy_path = nearest_neighbor(cities, start)
+        t1 = time.clock()
+        print_path(greedy_path, name='greedy', out=graph_file)
+        t2 = time.clock()
+        best_path, worst_path = evaluate_all_cities(cities, start)
+        t3 = time.clock()
+        print_path(best_path, name='best', out=graph_file)
+        print_path(worst_path, name='worst', out=graph_file)
+        graph_file.close()
+        print '... %fs' % (t3-t1)
+        #print >> benchmark, 'num_cities, greedy, best, worst, time_greedy, time_all'
+        print >> benchmark, '%i, %f, %f, %f, %f, %f' % (num_cities, traveled_distance(greedy_path), 
+                                                        traveled_distance(best_path),
+                                                        traveled_distance(worst_path),
+                                                        t1-t0, t3-t2)
+    benchmark.close()
+
