@@ -1,6 +1,4 @@
 
-# http://nbviewer.ipython.org/url/norvig.com/ipython/TSPv3.ipynb
-
 from collections import namedtuple
 import math
 import random
@@ -8,11 +6,17 @@ import itertools
 import sys
 import time
 
+""" Estructura para representar una ciudad:
+    name: Nombre de la ciudad
+    lat: Coordenada x de la ciudad
+    lon: Coordenada y de la ciudad
+"""
 City = namedtuple('City', 'name, lat, lon')
 
 # ===================================================================
 def distance(city1, city2):
-    """
+    """ Calcula la distancia euclideanea entre 2 ciudades
+        :return distancia = sqrt((city1.lat - city2.lat) + (city1.lon - city.lon))
     """
     x = city1.lat - city2.lat
     y = city1.lon - city2.lon
@@ -21,14 +25,19 @@ def distance(city1, city2):
 
 # ===================================================================
 def traveled_distance(path):
-    """
+    """ Calcula la distancia recorrida en todo un camino (lista de ciudades)
+        :param path: El camino recorrido
+        :return: La suma de las distancias entre los puntos
     """
     return sum([distance(path[i], path[i+1]) for i in range(len(path) - 1)])
 
 
 # ===================================================================
 def print_path(path, name='', out=sys.stdout):
-    """
+    """ Imprime el camino recorrido
+        :param path: El camino
+        :param name: Nombre del camino, opcional
+        :param out: Dispositivo de salida, salida estandar por default
     """
     str_path = '->'.join([p.name for p in path])
     print >> out, '[%s] %s : %f' % (name, str_path, traveled_distance(path))
@@ -36,7 +45,13 @@ def print_path(path, name='', out=sys.stdout):
 
 # ===================================================================
 def make_random_cities(num_cities, min_latlon=20, max_latlon=100):
-    """
+    """ Crea una lista de ciudades con coordenadas aleatorias
+        :param num_cities: Numero de ciudades a generar
+        :param min_latlon: Latitud y longitud minima para el valor aleatorio
+                           20 por defecto
+        :param max_latlon: Latitud y longitud maxima para el valor aleatorio
+                           100 por defecto
+        :return Una lista de ciudades aleatorias
     """
     return [City(name=str(n), 
             lat=random.randint(min_latlon, max_latlon), 
@@ -46,6 +61,11 @@ def make_random_cities(num_cities, min_latlon=20, max_latlon=100):
 
 # ===================================================================
 def nearest_city(city, cities):
+    """ Dada una ciudad, encuentra la ciudad mas cercana
+        :param city: La ciudad origen
+        :param cities: La lista de ciudades a encontrar la mas cercana
+        :return La ciudad mas cercana a city, en el conjunto cities
+    """
     min_distance = float('inf')
     min_city = None
     for c in cities:
@@ -57,8 +77,12 @@ def nearest_city(city, cities):
 
 
 # ===================================================================
-def all_cities(cities, start):
-    """
+def all_paths(cities, start):
+    """ Genera las permutaciones posibles para la lista de ciudades,
+        todas las permutaciones comienzan con la ciudad start
+        :param cities: La lista de ciudades a obtener sus permutaciones
+        :param start: La ciudad inicial de la permutacion
+        :return: Un iterador con una camino en la permutacion de ciudades
     """
     cities = list(cities)
     cities.remove(start)
@@ -67,17 +91,22 @@ def all_cities(cities, start):
         one_path = [start]
         one_path.extend(path)
         yield one_path
-        #all_paths.append(one_path)
 
 
 # ===================================================================
 def evaluate_all_cities(cities, start):
-    #all_paths = all_cities(cities, start)
+    """ Evalua por fuerza bruta todos los caminos posibles en el 
+        conjunto de ciudades.
+        :param cities: La lista de ciudades a iterar
+        :param start: La ciudad inicial
+        :return Una tupla (min, max) donde min es el camino mas corto 
+                y max es el camino mas largo
+    """
     global_min = float('inf')
     global_max = 0
     best_path = None
     worst_path = None
-    for path in all_cities(cities, start):
+    for path in all_paths(cities, start):
         d = traveled_distance(path) 
         if d < global_min:
             global_min = d
@@ -90,7 +119,13 @@ def evaluate_all_cities(cities, start):
 
 # ===================================================================
 def nearest_neighbor(cities, start, debug=False):
-    """
+    """ Algoritmo greedy para recorrer un conjunto de ciudades.
+        Siempre toma la ciudad mas cercana a la ciudad actual, esperando
+        encontar el minimo global del conjunto
+        :param cities: La lista de ciudades a evaluar
+        :param start: La ciudad inicial a navegar
+        :param debug: Escribir a consola el avance del proceso
+        :return El camino mas corto encotrado por el algoritmo
     """
     cities = list(cities)
     cities.remove(start)
@@ -110,12 +145,16 @@ def nearest_neighbor(cities, start, debug=False):
 
 # ===================================================================
 if __name__ == '__main__':
+    """ Punto de entrada a la consola
+        Evalua el algoritmo greedy para n ciudades, ademas calcula por
+        fuerza bruta el mejor y el menor camino que habia en el arreglo.
+        Escribe a un archivo por numero de ciudades iteradas el detalle
+        de cada ciudad, el mejor camino encontrado greedy y el mejor y
+        peor camino de todo el grafo
     """
-    """
-    #random.seed(1)
     benchmark = open('traveler.txt', 'w')
     print >> benchmark, 'num_cities, greedy, best, worst, time_greedy, time_all'
-    for num_cities in range(10, 101):
+    for num_cities in range(10, 12):
         sys.stdout.write('Evaluando todos los caminos para %i ciudades' % (num_cities))
         sys.stdout.flush()
         graph_file = open('ciudades_%i.txt' % num_cities, 'w')
@@ -134,7 +173,6 @@ if __name__ == '__main__':
         print_path(worst_path, name='worst', out=graph_file)
         graph_file.close()
         print '... %fs' % (t3-t1)
-        #print >> benchmark, 'num_cities, greedy, best, worst, time_greedy, time_all'
         print >> benchmark, '%i, %f, %f, %f, %f, %f' % (num_cities, traveled_distance(greedy_path), 
                                                         traveled_distance(best_path),
                                                         traveled_distance(worst_path),
