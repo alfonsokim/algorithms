@@ -1,10 +1,10 @@
 from collections import namedtuple
 
-import matplotlib
-import matplotlib.pyplot as plt
+#import matplotlib
+#import matplotlib.pyplot as plt
 import sys
 
-def plot(cities):
+def plot(cities, city):
     x = [int(city.lat) for city in cities]
     y = [int(city.lon) for city in cities]
     fig, ax = plt.subplots()
@@ -17,7 +17,12 @@ def plot(cities):
 City = namedtuple('City', 'name, lat, lon')
 
 def parse(str_path):
-    return None
+    return str_path[str_path.find(']')+2 : str_path.find(' : ')].split('->')
+
+def find_start_city(cities, path):
+    for city in cities:
+        if city.name == path[0]:
+            return cities, city 
 
 if __name__ == '__main__':
     inf = open(sys.argv[1], 'r')
@@ -32,4 +37,5 @@ if __name__ == '__main__':
             if line.startswith('[greedy]'): greedy = parse(line)
             if line.startswith('[best]'): best = parse(line)
             if line.startswith('[worst]'): worst = parse(line)
-    plot(cities)
+
+    plot(*find_start_city(cities, greedy))
