@@ -90,6 +90,7 @@ def all_paths(cities, start):
     for path in itertools.permutations(cities):
         one_path = [start]
         one_path.extend(path)
+        one_path.append(start)
         yield one_path
 
 
