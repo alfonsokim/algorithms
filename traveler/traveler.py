@@ -155,7 +155,7 @@ if __name__ == '__main__':
     """
     benchmark = open('traveler.txt', 'w')
     print >> benchmark, 'num_cities, greedy, best, worst, time_greedy, time_all'
-    for num_cities in range(10, 12):
+    for num_cities in range(10, 13):
         sys.stdout.write('Evaluando todos los caminos para %i ciudades' % (num_cities))
         sys.stdout.flush()
         graph_file = open('ciudades_%i.txt' % num_cities, 'w')
