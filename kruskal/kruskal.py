@@ -14,32 +14,6 @@ test_graph = [Edge(nodes=['A', 'B'], cost=10),
               Edge(nodes=['B', 'D'], cost=20),
               Edge(nodes=['C', 'D'], cost=3)]
 
-stations = [Edge(nodes=['B', 'C'], cost=13),
-            Edge(nodes=['C', 'A'], cost=23),
-            Edge(nodes=['E', 'D'], cost=24),
-            Edge(nodes=['E', 'F'], cost=20),
-            Edge(nodes=['F', 'C'], cost=25),
-            Edge(nodes=['G', 'D'], cost=25),
-            Edge(nodes=['H', 'F'], cost=25),
-            Edge(nodes=['J', 'G'], cost=29),
-            Edge(nodes=['L', 'K'], cost=19),
-            Edge(nodes=['M', 'I'], cost=22),
-            Edge(nodes=['M', 'L'], cost=23),
-            Edge(nodes=['O', 'J'], cost=27),
-            Edge(nodes=['P', 'K'], cost=20),
-            Edge(nodes=['P', 'O'], cost=20),
-            Edge(nodes=['Q', 'K'], cost=27),
-            Edge(nodes=['R', 'O'], cost=19),
-            Edge(nodes=['S', 'O'], cost=20),
-            Edge(nodes=['T', 'Q'], cost=25),
-            Edge(nodes=['U', 'N'], cost=31),
-            Edge(nodes=['V', 'R'], cost=20),
-            Edge(nodes=['X', 'S'], cost=33),
-            Edge(nodes=['X', 'W'], cost=23),
-            Edge(nodes=['Y', 'T'], cost=29),
-            Edge(nodes=['Y', 'U'], cost=34),
-            Edge(nodes=['Z', 'Y'], cost=38)]
-
 
 # ===============================================================
 def get_minimum_edge(graph):
@@ -90,10 +64,11 @@ def kruskal(graph):
         nodes = min_edge.nodes
         partition0 = find_partition(partitions, nodes[0])
         partition1 = find_partition(partitions, nodes[1])
-        partition0.extend(partition1)
-        partitions.remove(partition1)
+        if sorted(partition0) != sorted(partition1):
+            partition0.extend(partition1)
+            partitions.remove(partition1)
+            minimum_spanning_tree.append(min_edge)
         copy.remove(min_edge)
-        minimum_spanning_tree.append(min_edge)
     return minimum_spanning_tree
 
 
@@ -105,10 +80,26 @@ def read_graph_file(a_file):
         :param a_file: El nombre del archivo a leer
         :return: El grafo parseado
     """
-    pass
+    inf = open(a_file, 'r')
+    graph = []
+    for c, line in enumerate(inf):
+        items = line.upper().strip().split(',')
+        if len(items) != 3: raise Error('Error de formato en linea %i: %s' % (c , line))
+        graph.append(Edge(nodes=sorted(items[:2]), cost=int(items[2])))
+    return graph
 
 
 # ===============================================================
 if __name__ == '__main__':
-    print kruskal(stations)
-
+    """ Punto de entrada de la consola
+    """
+    minimum_spanning_tree = kruskal(read_graph_file('graph.txt'))
+    solution = read_graph_file('solution.txt')
+    by_edges = lambda(e) : ''.join(e.nodes)
+    minimum_spanning_tree.sort(key=by_edges)
+    solution.sort(key=by_edges)
+    if minimum_spanning_tree != solution:
+        for g, s in zip(minimum_spanning_tree, solution):
+            print 'g: %s, s:%s' % (g, s)
+    else:
+        print 'OK!'
