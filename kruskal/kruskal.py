@@ -98,6 +98,17 @@ def kruskal(graph):
 
 
 # ===============================================================
+def read_graph_file(a_file):
+    """ Lee un archivo en el formato a,b,c donde a y b son 
+        los nombres del vertice y c es el costo de la arista 
+        entre ellos.
+        :param a_file: El nombre del archivo a leer
+        :return: El grafo parseado
+    """
+    pass
+
+
+# ===============================================================
 if __name__ == '__main__':
     print kruskal(stations)
 
